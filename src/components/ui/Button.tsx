@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
-import { FC, HtmlHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, FC } from "react";
 
 const variants=cva(
    'active:scale-95 inline-flex justify-center items-center rounded-md text-sm transition-color focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none',
@@ -25,7 +25,7 @@ const variants=cva(
 )
 
 //Interface ButtonProps extends all the properties of an HTML button and the button variants
-export interface ButtonProps extends HtmlHTMLAttributes<HTMLButtonElement>, VariantProps<typeof variants> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof variants> {
    isLoading?:boolean
 }
 
