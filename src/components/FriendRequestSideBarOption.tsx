@@ -23,7 +23,7 @@ const FriendRequestSideBarOption:FC<FriendRequestSideBarOptionProps>=({
          <p className="truncate">Friend Requests</p>
          {
             unseenRequestCount>0?(
-               <div className="rounded-full w-5 h-5 flex text-xs justify-content items-center text-white bg-indigo-600">
+               <div className="rounded-full w-5 h-5 text-xs flex justify-center items-center text-white bg-indigo-600">
                   {unseenRequestCount}
                </div>
             ):null
