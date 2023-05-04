@@ -18,13 +18,13 @@ const FriendRequests:FC<FriendRequestsProps>=({
    const router=useRouter();
 
    const acceptFriend=async(senderId:string)=>{
-      await axios.post('api/requests/accept',{id:senderId});
+      await axios.post('/api/friends/accept',{id:senderId});
       setFriendRequests(preVal=>preVal.filter(request=>request.senderId!==senderId));
       router.refresh();
    }
 
    const denyFriend=async(senderId:string)=>{
-      await axios.post('api/requests/deny',{id:senderId});
+      await axios.post('/api/friends/deny',{id:senderId});
       setFriendRequests(preVal=>preVal.filter(request=>request.senderId!==senderId));
       router.refresh();
    }
@@ -40,10 +40,18 @@ const FriendRequests:FC<FriendRequestsProps>=({
                   <div key={request.senderId} className='flex gap-4 items-center '>
                      <UserPlus/>
                      <p className="font-medium text-lg">{request.senderEmail}</p>
-                     <button className="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 grid place-items-center rounded-full transition hover:shadow-md" aria-label="accept request">
+                     <button 
+                        className="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 grid place-items-center rounded-full transition hover:shadow-md" 
+                        aria-label="accept request"
+                        onClick={()=>acceptFriend(request.senderId)}
+                     >
                         <Check className="font-semibold text-white w-3/4 h-3/4"/>
                      </button>
-                     <button className="w-8 h-8 bg-red-600 hover:bg-red-700 grid place-items-center rounded-full transition hover:shadow-md" aria-label="deny request">
+                     <button 
+                        className="w-8 h-8 bg-red-600 hover:bg-red-700 grid place-items-center rounded-full transition hover:shadow-md" 
+                        aria-label="deny request"
+                        onClick={()=>denyFriend(request.senderId)}
+                     >
                         <Check className="font-semibold text-white w-3/4 h-3/4"/>
                      </button>
                   </div>
