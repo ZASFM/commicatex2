@@ -9,34 +9,38 @@ import SignOutButton from "@/components/SignOutButton";
 import FriendRequestSideBarOption from "@/components/FriendRequestSideBarOption";
 import { fetchRedis } from "@/helpers/redis";
 import { User } from "@/types/db";
+import { getFriendsByUserId } from "@/helpers/get-friends-by-user-id";
+import SidebarChatList from "@/components/SidebarChatList";
 
-interface LayoutProps{
-   children:ReactNode
+interface LayoutProps {
+   children: ReactNode
 }
 
-interface SidebarOption{
-   id:number
-   name:string
-   href:string
-   icon:Icon
+interface SidebarOption {
+   id: number
+   name: string
+   href: string
+   icon: Icon
 }
 
-const sidebarOptions:SidebarOption[]=[
+const sidebarOptions: SidebarOption[] = [
    {
-      id:1,
-      name:'Add friend',
-      href:'/dashboard/add',
-      icon:'UserPlus'
+      id: 1,
+      name: 'Add friend',
+      href: '/dashboard/add',
+      icon: 'UserPlus'
    }
 ]
 
-const Layout=async({children}:LayoutProps)=>{
-   const session=await getServerSession(authOptions);
-   if(!session) notFound()
+const Layout = async ({ children }: LayoutProps) => {
+   const session = await getServerSession(authOptions);
+   if (!session) notFound();
 
-   const unseenRequestCount=(await fetchRedis('smembers',`user:${session.user.id}:incoming_friend_request`) as User[]).length;
+   const friends = await getFriendsByUserId(session.user.id)
+
+   const unseenRequestCount = (await fetchRedis('smembers', `user:${session.user.id}:incoming_friend_request`) as User[]).length;
    console.log(unseenRequestCount);
-   
+
 
    return (
       <div className="w-full flex h-screen">
@@ -44,27 +48,35 @@ const Layout=async({children}:LayoutProps)=>{
             <Link href='/dashboard' className="flex h-6 shrink-0 items-center">
                <p className="h-8 w-auto text-indigo-600">ZASFM</p>
             </Link>
-            <div className="text-sm text-gray-600 leading-6 font-semibold">
-               Your chats:
-            </div>
+            {
+               friends !== undefined && friends?.length > 0 ? (
+                  <div className="text-xs font-semibold leading-6 text-gray-400">
+                     Your chats:
+                  </div>
+               ) : null
+            }
             <nav className="flex flex-1 flex-col">
                <ul className="flex flex-1 gap-y-7 flex-col" role='list'>
-                  <li>//User chats</li>
+                  <li>
+                     <SidebarChatList
+                        friends={friends}
+                     />
+                  </li>
                   <li>
                      <div className="text-sx font-semibold leading-6 text-gray-400">
                         Overview
                      </div>
                      <ul className="-mx-2 mt-2 space-y-1">
-                        {sidebarOptions.map(option=>{
-                           const Icon=Icons[option.icon]
-                           return(
-                              <li 
+                        {sidebarOptions.map(option => {
+                           const Icon = Icons[option.icon]
+                           return (
+                              <li
                                  key={option.id}
                                  className='text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-3 rounded-md p-2 text-sm leading-6 font-semibold'
                               >
                                  <Link href={option.href}>
                                     <span className="'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white">
-                                       <Icon className="h-4 w-4"/>
+                                       <Icon className="h-4 w-4" />
                                     </span>
                                     <span className="truncate">{option.name}</span>
                                  </Link>
@@ -96,9 +108,9 @@ const Layout=async({children}:LayoutProps)=>{
                            <span className="text-xs text-zinc-400" aria-hidden='true'>{
                               session.user.email
                            }</span>
-                        </div> 
+                        </div>
                      </div>
-                     <SignOutButton className='h-full aspect-square'/>
+                     <SignOutButton className='h-full aspect-square' />
                   </li>
                </ul>
             </nav>
