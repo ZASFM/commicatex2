@@ -1,13 +1,21 @@
 import { cn } from "@/lib/utils";
-import { Message } from "@/types/db";
+import { Message, User } from "@/types/db";
+import { format } from "date-fns";
+import Image from "next/image";
 import { FC, useRef, useState } from "react";
 
 interface MessagesProps {
    initialMessages: Message[],
-   sessionId: string
+   sessionId: string,
+   sessionImg:string|null|undefined,
+   chatPartner:User
 }
 
-const Messages: FC<MessagesProps> = ({ initialMessages, sessionId }) => {
+const formatTime=(timestamp:number)=>{
+   return format(timestamp,'HH:mm');
+}
+
+const Messages: FC<MessagesProps> = ({ initialMessages, sessionId,sessionImg, chatPartner }) => {
    const scrollDownRef = useRef<HTMLDivElement | null>(null);
    const [messages, setMessages] = useState<Message[]>(initialMessages);
 
@@ -36,9 +44,24 @@ const Messages: FC<MessagesProps> = ({ initialMessages, sessionId }) => {
                            })}>
                               {message.text}{' '}
                               <span className="ml-2 text-xs text-gray-400">
-                                 {message.timestamp}
+                                 {formatTime(message.timestamp)}
                               </span>
                            </span>
+                        </div>
+                        <div className={cn('relative h-6 w-6',{
+                           'order-2':isCurrentUser,
+                           'order-1':!isCurrentUser,
+                           'invisible':hasNextMessage  
+                        })}>
+                           <Image
+                              fill
+                              src={
+                                 isCurrentUser?(sessionImg as string):(chatPartner.image)
+                              }
+                              alt='profile pic'
+                              referrerPolicy="no-referrer"
+                              className="rounded-full"
+                           />
                         </div>
                      </div>
                   </div>
