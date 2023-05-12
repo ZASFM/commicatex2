@@ -1,23 +1,37 @@
-import { cn } from "@/lib/utils";
+import { pusherClient } from "@/lib/pusher";
+import { cn, toPusherKey } from "@/lib/utils";
 import { Message, User } from "@/types/db";
 import { format } from "date-fns";
 import Image from "next/image";
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 interface MessagesProps {
    initialMessages: Message[],
    sessionId: string,
    sessionImg:string|null|undefined,
-   chatPartner:User
+   chatPartner:User,
+   chatId:string
 }
 
 const formatTime=(timestamp:number)=>{
    return format(timestamp,'HH:mm');
 }
 
-const Messages: FC<MessagesProps> = ({ initialMessages, sessionId,sessionImg, chatPartner }) => {
+const Messages: FC<MessagesProps> = ({ initialMessages, sessionId,sessionImg, chatPartner, chatId }) => {
    const scrollDownRef = useRef<HTMLDivElement | null>(null);
    const [messages, setMessages] = useState<Message[]>(initialMessages);
+
+   useEffect(()=>{
+      pusherClient.subscribe(toPusherKey(`chat:${chatId}`));
+      const messageHandler=(message:Message)=>{
+         setMessages(preVal=>[message,...preVal]);
+      }
+      pusherClient.bind('incoming-message',messageHandler);
+      return ()=>{
+         pusherClient.unsubscribe(toPusherKey(`chat:${chatId}`));
+         pusherClient.unbind('incoming-message',messageHandler);
+      }
+   },[])
 
    return (
       <div id="messages" className="flex flex-1 h-full flex-col-reverse gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrollbar-touch">
