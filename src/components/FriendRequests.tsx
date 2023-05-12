@@ -1,9 +1,11 @@
 'use client'
 
+import { pusherClient } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 import axios from "axios";
 import { Check, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 interface FriendRequestsProps{
    incomingFriendRequests:IncomingFriendRequests[],
@@ -16,6 +18,19 @@ const FriendRequests:FC<FriendRequestsProps>=({
 })=>{
    const [friendRequests,setFriendRequests]=useState<IncomingFriendRequests[]>(incomingFriendRequests);
    const router=useRouter();
+
+   //for real time purposes I want to send subscribe to a channel and then bind a certain event with the handler:
+   useEffect(()=>{
+      pusherClient.subscribe(toPusherKey(`use:${sessionId}:incoming_friend_request`));
+      const friendRequestHandler=({senderId, senderEmail}:IncomingFriendRequests)=>{
+         setFriendRequests(preVal=>[...preVal,{senderId,senderEmail}])
+      }
+      pusherClient.bind('incoming_friend_request',friendRequestHandler);
+      return ()=>{
+         pusherClient.unsubscribe(toPusherKey(`use:${sessionId}:incoming_friend_request`));
+         pusherClient.unbind('incoming_friend_request',friendRequestHandler);
+      }
+   },[])
 
    const acceptFriend=async(senderId:string)=>{
       await axios.post('/api/friends/accept',{id:senderId});
