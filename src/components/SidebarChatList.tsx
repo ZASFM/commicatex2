@@ -4,17 +4,59 @@ import { Message } from "@/types/db";
 import { User } from "@/types/db";
 import { FC, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { chatHrefConstructor } from "@/lib/utils";
+import { chatHrefConstructor, toPusherKey } from "@/lib/utils";
+import { pusherClient } from "@/lib/pusher";
+import { toast } from "react-hot-toast";
+import UnseenChatToast from "./UnseenChatToast";
 
 type SideBarChatListProps = {
    friends: User[] | undefined,
    session: string
 }
 
+interface ExtendedMessage extends Message{
+   senderImg:string,
+   sederName:string
+}
+
 const SidebarChatList: FC<SideBarChatListProps> = ({ friends, session }) => {
    const [unseenMessages, setUnseenMessages] = useState<Message[]>([]);
    const router = useRouter();
    const pathname = usePathname();
+
+   useEffect(()=>{
+      pusherClient.subscribe(toPusherKey(`user:${session}:chats`));
+      pusherClient.subscribe(toPusherKey(`user:${session}:friends`));
+ 
+      const messageHandler=(message:ExtendedMessage)=>{
+         const shouldNotify=pathname!==`/dashboard/chat/${chatHrefConstructor(session,message.senderId)}`;
+         if(!shouldNotify) return;
+
+         toast.custom((t)=>(
+            <UnseenChatToast
+               t={t}
+               senderId={message.senderId}
+               sessionId={session}
+               senderName={message.sederName}
+               senderMessage={message.text}
+               senderImg={message.senderImg}
+            />
+         ));
+
+         setUnseenMessages(preVal=>[...preVal,message]);
+      }
+
+      const friendHandler=()=>{
+         router.refresh();
+      }
+      
+      pusherClient.bind('new_message',messageHandler);
+      pusherClient.bind('new_friend',friendHandler);
+      return ()=>{
+         pusherClient.unsubscribe(toPusherKey(`user:${session}:chats`));
+         pusherClient.unsubscribe(toPusherKey(`user:${session}:friends`));
+      }
+   },[pathname, router, session])
 
    //method to see if the user has seen the message, getting my current pathname (chat id) and taking it out of the unseen messages
    useEffect(() => {
