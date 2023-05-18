@@ -1,3 +1,5 @@
+'use client'
+
 import { pusherClient } from "@/lib/pusher";
 import { cn, toPusherKey } from "@/lib/utils";
 import { Message, User } from "@/types/db";
@@ -31,7 +33,7 @@ const Messages: FC<MessagesProps> = ({ initialMessages, sessionId,sessionImg, ch
          pusherClient.unsubscribe(toPusherKey(`chat:${chatId}`));
          pusherClient.unbind('incoming-message',messageHandler);
       }
-   },[])
+   },[chatId])
 
    return (
       <div id="messages" className="flex flex-1 h-full flex-col-reverse gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrollbar-touch">
