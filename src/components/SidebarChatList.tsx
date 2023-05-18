@@ -55,6 +55,8 @@ const SidebarChatList: FC<SideBarChatListProps> = ({ friends, session }) => {
       return ()=>{
          pusherClient.unsubscribe(toPusherKey(`user:${session}:chats`));
          pusherClient.unsubscribe(toPusherKey(`user:${session}:friends`));
+         pusherClient.unbind('new_message',messageHandler);
+         pusherClient.unbind('new_friend',friendHandler);
       }
    },[pathname, router, session])
 
