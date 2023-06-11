@@ -3,20 +3,17 @@ This project is a real-time chat application developed using the MERN (MongoDB, 
 
 <h3>Technologies Used</h3>
 - Front-end:
-
- - Next.js
- - JavaScript
- - TypeScript
- - CSS
- - TailwindCSS
+  Next.js
+  JavaScript
+  TypeScript
+  CSS
+  TailwindCSS
  
 - Backend:
-
- - Next.js serverless functions
+  Next.js serverless functions
 
 - Database:
-
- - Redis
+  Redis
  
 <h3>Features</h3>
 - Real-time messaging: Users can send and receive messages in real-time, enabling instant communication.
